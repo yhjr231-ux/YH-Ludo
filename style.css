@@ -410,24 +410,23 @@ button:active {
     }
 
     .ludo-area {
-        position: absolute;
-        top: 55px;
-        right: 0;
-        bottom: 5px;
-        left: 0;
-        width: 100%;
-        min-height: 0;
-        display: grid;
-        place-items: center;
-    }
+    position: absolute;
+    top: 5px;
+    right: 0;
+    bottom: 5px;
+    left: 0;
+    width: 100%;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+}
 
-    .ludo-board {
-        width: min(calc(100dvh - 65px), calc(100vw - 20px));
-        max-width: none;
-        height: auto;
-        aspect-ratio: 1;
-    }
-
+.ludo-board {
+    width: min(calc(100dvh - 10px), calc(100vw - 10px));
+    max-width: none;
+    height: auto;
+    aspect-ratio: 1;
+}
     .back-home-btn {
         position: absolute;
         left: 12px;
