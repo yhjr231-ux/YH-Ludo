@@ -1,0 +1,383 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    width: 100%;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #172554, #312e81);
+    color: white;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* الشاشات الرئيسية */
+.home-screen,
+.setup-screen {
+    width: 90%;
+    max-width: 450px;
+    margin: 30px auto;
+    padding: 30px;
+    text-align: center;
+    background: #ffffff15;
+    border: 1px solid #ffffff30;
+    border-radius: 25px;
+}
+
+h1 {
+    font-size: 42px;
+    color: #facc15;
+}
+
+.home-screen p {
+    color: #e2e8f0;
+}
+
+.player-options {
+    display: grid;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+button {
+    padding: 16px;
+    border: none;
+    border-radius: 15px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    background: #facc15;
+    color: #172554;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+/* تجهيز اللاعبين */
+.setup-screen h2 {
+    color: #facc15;
+}
+
+.player-card {
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 15px;
+    background: #ffffff15;
+}
+
+.player-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    text-align: center;
+}
+
+.player-color {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    border-radius: 50%;
+    vertical-align: middle;
+}
+
+/* شاشة اللعب */
+.game-screen:not([hidden]) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    margin: 0;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+}
+
+.game-screen h2 {
+    margin: 3px;
+    color: #facc15;
+    font-size: 22px;
+}
+
+#turn-info {
+    margin: 5px;
+    font-size: 18px;
+    color: #facc15;
+}
+
+/* منطقة اللوحة */
+.ludo-area {
+    position: relative;
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+}
+
+/* لوحة لودو */
+.ludo-board {
+    width: min(100%, 100dvh - 65px);
+    max-width: 1000px;
+    height: auto;
+    aspect-ratio: 1;
+    background: white;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.ludo-board svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* النرد */
+.player-dice {
+    position: absolute;
+    z-index: 5;
+    width: 76px;
+    height: 76px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* أماكن النرد */
+.red-dice {
+    left: 2%;
+    top: 2%;
+}
+
+.green-dice {
+    right: 2%;
+    top: 2%;
+}
+
+.blue-dice {
+    left: 2%;
+    bottom: 2%;
+}
+
+.yellow-dice {
+    right: 2%;
+    bottom: 2%;
+}
+
+/* وجه النرد */
+.dice-top {
+    width: 68px;
+    height: 68px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 9px;
+    gap: 3px;
+    border: 3px solid #292522;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #ffffff, #d8d8d8);
+    box-shadow:
+        0 7px 0 #777,
+        0 11px 14px #0006;
+    transform: perspective(400px) rotateX(12deg) rotateZ(-8deg);
+}
+
+.dice-top i {
+    display: block;
+    border-radius: 50%;
+}
+
+.dice-top i.pip {
+    background: #222;
+    box-shadow: inset 0 1px 2px #0008;
+}
+
+/* حركة النرد */
+.player-dice.rolling .dice-top {
+    animation: dice-roll 0.9s ease-in-out;
+}
+
+@keyframes dice-roll {
+    0% {
+        transform: perspective(400px) rotateX(12deg) rotateZ(-8deg);
+    }
+
+    30% {
+        transform: perspective(400px) rotateX(50deg) rotateZ(160deg);
+    }
+
+    65% {
+        transform: perspective(400px) rotateX(-25deg) rotateZ(380deg);
+    }
+
+    100% {
+        transform: perspective(400px) rotateX(12deg) rotateZ(712deg);
+    }
+}
+
+/* شاشة الفوز */
+.winner-screen:not([hidden]) {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #172554, #312e81);
+}
+
+.winner-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 35px 25px;
+    text-align: center;
+    background: white;
+    color: #1e293b;
+    border-radius: 25px;
+    box-shadow: 0 15px 40px #0005;
+    animation: winnerAppear 0.5s ease;
+}
+
+.winner-icon {
+    font-size: 75px;
+    margin-bottom: 10px;
+}
+
+.winner-card h1 {
+    margin: 10px 0;
+    color: #d49b00;
+}
+
+.winner-card h2 {
+    color: #312e81;
+    font-size: 27px;
+}
+
+.winner-card p {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.winner-card button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 10px;
+    border-radius: 12px;
+    background: #312e81;
+    color: white;
+    font-size: 17px;
+}
+
+.winner-card button:hover {
+    background: #4338ca;
+}
+
+@keyframes winnerAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* الموبايلات الصغيرة */
+@media (max-width: 480px) {
+    .game-screen:not([hidden]) {
+        padding: 5px;
+    }
+
+    .game-screen h2 {
+        font-size: 19px;
+    }
+
+    #turn-info {
+        font-size: 16px;
+    }
+
+    .player-dice {
+        width: 54px;
+        height: 54px;
+    }
+
+    .dice-top {
+        width: 48px;
+        height: 48px;
+        padding: 6px;
+        gap: 2px;
+        border-width: 2px;
+        border-radius: 10px;
+    }
+    .ludo-board {
+    width: min(100%, calc(100dvh - 65px));
+}
+}
+.exit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: #0009;
+    backdrop-filter: blur(5px);
+}
+
+.exit-modal[hidden] {
+    display: none !important;
+}
+
+.exit-card {
+    width: 100%;
+    max-width: 350px;
+    padding: 30px 20px;
+    text-align: center;
+    color: #1e293b;
+    background: white;
+    border-radius: 22px;
+    box-shadow: 0 15px 40px #0006;
+    animation: winnerAppear 0.3s ease;
+}
+
+.exit-card h2 {
+    color: #312e81;
+    font-size: 24px;
+}
+
+.exit-card p {
+    color: #64748b;
+    margin: 20px 0;
+}
+
+.exit-card button {
+    width: 100%;
+    margin-top: 10px;
+    padding: 13px;
+    border-radius: 12px;
+    background: #312e81;
+    color: white;
+    font-size: 17px;
+}
+
+.exit-card button:last-child {
+    background: #e2e8f0;
+    color: #1e293b;
+}

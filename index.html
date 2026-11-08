@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#172554">
+    <title>YH Ludo</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+
+<body>
+
+    <!-- شاشة البداية -->
+    <main class="home-screen" id="home-screen">
+
+        <h1>🎲 YH Ludo</h1>
+        <p>اللعبة أحلى مع أصحابك!</p>
+
+        <div class="player-options">
+    <button onclick="startGame(1)">لاعب واحد ضد الكمبيوتر 🤖</button>
+    <button onclick="startGame(2)">لاعبان ضد الكمبيوتر 🤖</button>
+    <button onclick="startGame(3)">3 لاعبين ضد الكمبيوتر 🤖</button>
+    <button onclick="startGame(4)">4 لاعبين - كل لاعب لوحده</button>
+    <button onclick="startGame(4, true)">4 لاعبين - فريقان (2 ضد 2) 👥</button>
+</div>
+
+<p>اختار طريقة اللعب</p>
+    </main>
+
+    
+    <!-- شاشة تجهيز اللاعبين -->
+    <main class="setup-screen" id="setup-screen" hidden>
+
+        <h2>تجهيز اللاعبين</h2>
+
+        <div id="players-container"></div>
+
+        <button onclick="beginGame()">ابدأ اللعب 🎲</button>
+        <button onclick="backToHome()">رجوع</button>
+
+    </main>
+
+    <!-- شاشة اللعب -->
+    <main class="game-screen" id="game-screen" hidden>
+
+        <h2>🎲 YH Ludo</h2>
+<button class="back-home-btn" onclick="confirmExit()">
+    🏠 الرئيسية
+</button>
+        <div id="turn-info">دور اللاعب</div>
+
+        <div class="ludo-area">
+
+    <button class="player-dice red-dice" id="dice-red"
+    onclick="rollDice('red')" hidden>
+    <span class="dice-top" id="face-red">
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+    </span>
+</button>
+
+    <button class="player-dice green-dice" id="dice-green"
+    onclick="rollDice('green')" hidden>
+    <span class="dice-top" id="face-green">
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+    </span>
+</button>
+
+    <button class="player-dice blue-dice" id="dice-blue"
+    onclick="rollDice('blue')" hidden>
+    <span class="dice-top" id="face-blue">
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+    </span>
+</button>
+
+    <button class="player-dice yellow-dice" id="dice-yellow"
+    onclick="rollDice('yellow')" hidden>
+    <span class="dice-top" id="face-yellow">
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+        <i></i><i></i><i></i>
+    </span>
+</button>
+
+    <div class="ludo-board" id="ludo-board"></div>
+
+</div>
+
+    </main>
+<!-- نافذة تأكيد الخروج -->
+<div class="exit-modal" id="exit-modal" hidden>
+    <div class="exit-card">
+        <h2>🏠 العودة للرئيسية؟</h2>
+        <p>هل تريد الخروج من اللعبة الحالية؟</p>
+
+        <button onclick="returnHome()">خروج</button>
+        <button onclick="cancelExit()">إكمال اللعب</button>
+    </div>
+</div>
+<!-- شاشة الفوز -->
+<main class="winner-screen" id="winner-screen" hidden>
+    <div class="winner-card">
+        <div class="winner-icon">🏆</div>
+        <h1>مبروك الفوز!</h1>
+        <h2 id="winner-name"></h2>
+        <p>لقد فزت في لعبة YH Ludo!</p>
+
+        <button onclick="restartGame()">العب من جديد 🎲</button>
+        <button onclick="returnHome()">الرئيسية</button>
+    </div>
+</main>
+<script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+            .then(() => console.log("YH Ludo PWA Ready"))
+            .catch(error => console.error("Service Worker Error:", error));
+    });
+}
+</script>
+</body>
+</html>
