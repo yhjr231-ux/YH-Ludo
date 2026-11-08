@@ -409,44 +409,35 @@ button:active {
         z-index: 10;
     }
 
-    /* مساحة اللوحة */
     .ludo-area {
         position: absolute;
         top: 55px;
         right: 0;
         bottom: 5px;
-        left: 100px;
-        width: auto;
+        left: 0;
+        width: 100%;
         min-height: 0;
         display: grid;
         place-items: center;
     }
 
-    /* تكبير اللوحة مع الحفاظ على شكلها */
     .ludo-board {
-        width: min(calc(100dvh - 70px), calc(100vw - 140px));
-        max-width: 1000px;
+        width: min(calc(100dvh - 65px), calc(100vw - 20px));
+        max-width: none;
         height: auto;
         aspect-ratio: 1;
     }
 
-    /* زر الرئيسية على الجانب */
     .back-home-btn {
         position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
+        left: 12px;
+        top: 8px;
         width: 85px;
-        padding: 12px 5px;
-        font-size: 15px;
+        padding: 10px 5px;
+        font-size: 14px;
         z-index: 20;
     }
 
-    .back-home-btn:active {
-        transform: translateY(-50%) scale(0.97);
-    }
-
-    /* أحجام النرد */
     .player-dice {
         width: 65px;
         height: 65px;
@@ -455,5 +446,25 @@ button:active {
     .dice-top {
         width: 58px;
         height: 58px;
+    }
+
+    .red-dice {
+        left: 1%;
+        top: 1%;
+    }
+
+    .green-dice {
+        right: 1%;
+        top: 1%;
+    }
+
+    .blue-dice {
+        left: 1%;
+        bottom: 1%;
+    }
+
+    .yellow-dice {
+        right: 1%;
+        bottom: 1%;
     }
 }
