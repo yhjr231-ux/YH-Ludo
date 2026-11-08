@@ -381,3 +381,79 @@ button:active {
     background: #e2e8f0;
     color: #1e293b;
 }
+/* تصميم التابلت بالعرض */
+@media (min-width: 700px) and (orientation: landscape) {
+
+    .game-screen:not([hidden]) {
+        padding: 5px;
+        display: block;
+    }
+
+    .game-screen h2 {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        font-size: 20px;
+        z-index: 10;
+    }
+
+    #turn-info {
+        position: absolute;
+        top: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        font-size: 16px;
+        z-index: 10;
+    }
+
+    /* مساحة اللوحة */
+    .ludo-area {
+        position: absolute;
+        top: 55px;
+        right: 0;
+        bottom: 5px;
+        left: 100px;
+        width: auto;
+        min-height: 0;
+        display: grid;
+        place-items: center;
+    }
+
+    /* تكبير اللوحة مع الحفاظ على شكلها */
+    .ludo-board {
+        width: min(calc(100dvh - 70px), calc(100vw - 140px));
+        max-width: 1000px;
+        height: auto;
+        aspect-ratio: 1;
+    }
+
+    /* زر الرئيسية على الجانب */
+    .back-home-btn {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 85px;
+        padding: 12px 5px;
+        font-size: 15px;
+        z-index: 20;
+    }
+
+    .back-home-btn:active {
+        transform: translateY(-50%) scale(0.97);
+    }
+
+    /* أحجام النرد */
+    .player-dice {
+        width: 65px;
+        height: 65px;
+    }
+
+    .dice-top {
+        width: 58px;
+        height: 58px;
+    }
+}
