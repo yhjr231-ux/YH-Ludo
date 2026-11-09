@@ -42,9 +42,9 @@ const mainPath = [
 
 const startPositions = {
     red: 0,
-    green: 13,
-    yellow: 26,
-    blue: 39
+    green: 12,
+    yellow: 25,
+    blue: 38
 };
 const homePaths = {
     red: [
@@ -63,8 +63,35 @@ const homePaths = {
         [13, 7], [12, 7], [11, 7], [10, 7], [9, 7]
     ]
 };
+// تحديد آخر خانة في الطريق الخارجي لكل لون
+function getHomeEntryPosition(colorId) {
+    const arrowPositions = {
+        red: 50,
+        green: 50,
+        yellow: 50,
+        blue: 50
+    };
+
+    return arrowPositions[colorId];
+}
+
+// أول خانة في الممر الداخلي
+function getHomeStartPosition(colorId) {
+    return getHomeEntryPosition(colorId) + 1;
+}
+
+// موضع الفوز النهائي
+function getFinishPosition(colorId) {
+    return getHomeStartPosition(colorId) + 5;
+}
+function getTrackIndex(colorId, position) {
+    return (
+        startPositions[colorId] + position
+    ) % mainPath.length;
+}
 function startGame(count, teams = false) {
         gameSession++;
+        diceRollCount = 0;
     humanCount = count;
     teamMode = teams;
 
@@ -168,11 +195,11 @@ if (!players[currentPlayer].isHuman) {
 
 function drawPlayerPieces() {
     const homePositions = {
-        red: [[80, 80], [160, 80], [80, 160], [160, 160]],
-        green: [[440, 80], [520, 80], [440, 160], [520, 160]],
-        blue: [[80, 440], [160, 440], [80, 520], [160, 520]],
-        yellow: [[440, 440], [520, 440], [440, 520], [520, 520]]
-    };
+    red: [[96, 80], [192, 80], [96, 160], [192, 160]],
+    green: [[528, 80], [624, 80], [528, 160], [624, 160]],
+    blue: [[96, 440], [192, 440], [96, 520], [192, 520]],
+    yellow: [[528, 440], [624, 440], [528, 520], [624, 520]]
+};
 
     const allPieces = [];
 
@@ -187,30 +214,60 @@ function drawPlayerPieces() {
                     piece.visualPosition ?? piece.position;
 
                 function getPositionCoordinates(position) {
-                    if (position <= 51) {
-                        const absolutePosition =
-                            startPositions[player.colorId] + position;
+    const entryPosition =
+        getHomeEntryPosition(player.colorId);
 
-                        const pathIndex =
-                            Math.floor(absolutePosition) % mainPath.length;
+    const homeStart =
+        getHomeStartPosition(player.colorId);
 
-                        const [row, col] = mainPath[pathIndex];
-                        return [col * 40 + 20, row * 40 + 20];
-                    }
+    const finishPosition =
+        getFinishPosition(player.colorId);
 
-                    if (position <= 56) {
-                        const laneIndex = position - 52;
-                        const [row, col] =
-                            homePaths[player.colorId][laneIndex];
+    // الطريق الخارجي حتى الوصول للسهم
+    if (position <= entryPosition) {
+        const absolutePosition =
+            startPositions[player.colorId] + position;
 
-                        return [col * 40 + 20, row * 40 + 20];
-                    }
+        const pathIndex =
+            absolutePosition % mainPath.length;
 
-                    return [300, 300];
-                }
+        const [row, col] = mainPath[pathIndex];
+
+        return [
+            col * 48 + 24,
+            row * 40 + 20
+        ];
+    }
+
+    // الممر الداخلي
+    if (position < finishPosition) {
+        const laneIndex = position - homeStart;
+
+        const [row, col] =
+            homePaths[player.colorId][laneIndex];
+
+        return [
+            col * 48 + 24,
+            row * 40 + 20
+        ];
+    }
+
+  // نقطة الفوز: مركز المثلث الخاص باللون
+const finishCenters = {
+    red: [312, 300],
+    green: [360, 260],
+    yellow: [408, 300],
+    blue: [360, 340]
+};
+
+return finishCenters[player.colorId];
+}
 
                 const fromPosition = Math.floor(visualPosition);
-                const toPosition = Math.min(fromPosition + 1, 57);
+                const toPosition = Math.min(
+    fromPosition + 1,
+    getFinishPosition(player.colorId)
+);
                 const progress = visualPosition - fromPosition;
 
                 const [x1, y1] =
@@ -234,33 +291,80 @@ function drawPlayerPieces() {
     });
 
     // تجميع القطع الموجودة في نفس المكان
-    const groups = {};
+const groups = {};
 
-    allPieces.forEach(item => {
-        const key = `${Math.round(item.x)},${Math.round(item.y)}`;
+allPieces.forEach(item => {
+    const isFinished =
+        item.piece.position === getFinishPosition(item.player.colorId);
 
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(item);
-    });
+    const key = isFinished
+        ? `finish-${item.player.colorId}`
+        : `${Math.round(item.x)},${Math.round(item.y)}`;
+
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(item);
+});
+
 
     let piecesSVG = "";
 
     Object.values(groups).forEach(group => {
-        group.forEach((item, index) => {
-            let offsetX = 0;
-            let offsetY = 0;
+        const isFinishedGroup =
+    group[0].piece.position ===
+    getFinishPosition(group[0].player.colorId);
 
-            if (group.length > 1) {
-                const angle =
-                    (2 * Math.PI * index) / group.length;
+group.forEach((item, index) => {
+    let offsetX = 0;
+    let offsetY = 0;
+    let pieceScale = 1;
 
-                offsetX = Math.cos(angle) * 10;
-                offsetY = Math.sin(angle) * 10;
-            }
+     if (isFinishedGroup) {
+    const finishOffsets = {
+        red: [
+            [0, 0],
+            [8, 0],
+            [0, -9],
+            [0, 9]
+        ],
 
-            const x = item.x + offsetX;
-            const y = item.y + offsetY;
-const pieceScale = group.length > 1 ? 0.65 : 1;
+        green: [
+            [0, 0],
+            [-8, -5],
+            [8, -5],
+            [0, 9]
+        ],
+
+        yellow: [
+            [0, 0],
+            [-8, 0],
+            [0, -9],
+            [0, 9]
+        ],
+
+        blue: [
+            [0, 0],
+            [-8, 5],
+            [8, 5],
+            [0, -9]
+        ]
+    };
+
+    const positions = finishOffsets[item.player.colorId];
+
+    [offsetX, offsetY] = positions[index] || [0, 0];
+
+    pieceScale = Math.max(0.4, 0.75 - index * 0.08);
+}else if (group.length > 1) {
+        const angle =
+            (2 * Math.PI * index) / group.length;
+
+        offsetX = Math.cos(angle) * 10;
+        offsetY = Math.sin(angle) * 10;
+        pieceScale = 0.65;
+    }
+
+    const x = item.x + offsetX;
+    const y = item.y + offsetY;
             piecesSVG += `
     <g transform="translate(${x} ${y}) scale(${pieceScale}) translate(${-x} ${-y})">
         <defs>
@@ -375,16 +479,30 @@ function updateTurn() {
 
     currentDice.hidden = false;
 }
+let diceRollCount = 0;
+
 function getFairDiceRoll() {
     const max = 4294967296;
-    const limit = max - (max % 6);
     const random = new Uint32Array(1);
+
+    // أول 8 رميات: ممنوع الرقم 1
+    // بعد ذلك: الرقم 1 احتماله أقل من باقي الأرقام
+    const allowedNumbers = diceRollCount < 8
+        ? [2, 3, 4, 5, 6]
+        : [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6];
+
+    const limit = max - (max % allowedNumbers.length);
 
     do {
         crypto.getRandomValues(random);
     } while (random[0] >= limit);
 
-    return (random[0] % 6) + 1;
+    const result =
+        allowedNumbers[random[0] % allowedNumbers.length];
+
+    diceRollCount++;
+
+    return result;
 }
 function saveWinner(player) {
     const winnerName = teamMode
@@ -424,13 +542,13 @@ function saveWinner(player) {
 function getActivePieceOwner(player) {
     if (
         !teamMode ||
-        !player.pieces.every(piece => piece.position === 57)
-    ) {
-        return player;
-    }
+        !player.pieces.every(piece =>
+            piece.position === getFinishPosition(player.colorId)
+        )
+    ) return player;
 
-    return players.find(
-        p => p.teamId === player.teamId && p !== player
+    return players.find(p =>
+        p.teamId === player.teamId && p !== player
     );
 }
 function rollDice(colorId) {
@@ -442,10 +560,18 @@ const rollingSession = gameSession;
 
     canRoll = false;
     diceValue = getFairDiceRoll();
+    console.log(
+    `الرمي رقم ${diceRollCount} | ${player.name} (${player.colorId}) | النتيجة: ${diceValue}`
+);
 const rollingDiceValue = diceValue;
-    const currentDice = document.getElementById(`dice-${colorId}`);
-    currentDice.classList.add("rolling");
+   const currentDice = document.getElementById(`dice-${colorId}`);
 
+currentDice.hidden = false;
+
+// إعادة تشغيل الأنيميشن في كل رمية
+currentDice.classList.remove("rolling");
+void currentDice.offsetWidth;
+currentDice.classList.add("rolling");
     setTimeout(() => {
     if (
     gameSession !== rollingSession ||
@@ -457,22 +583,36 @@ const rollingDiceValue = diceValue;
 
         console.log("نتيجة النرد:", diceValue);
 
-       const legalPieces = pieceOwner.pieces
-    .map((piece, index) => ({ piece, index }))
-    .filter(({ piece }) => {
-        if (piece.position === -1) {
-            return diceValue === 6;
-        }
+       const finishPosition = getFinishPosition(pieceOwner.colorId);
 
-        if (piece.position === 57) return false;
+const legalPieces = pieceOwner.pieces
+  .map((piece, index) => ({ piece, index }))
+  .filter(({ piece }) => {
+      if (piece.position === -1) {
+          return diceValue === 6;
+      }
 
-        return piece.position + diceValue <= 57;
-    });
+      if (piece.position === finishPosition) return false;
+
+      return piece.position + diceValue <= finishPosition;
+  });
         if (legalPieces.length === 0) {
-            nextTurn();
-            return;
-        }
+   document.getElementById("turn-info").textContent =
+    player.isHuman
+        ? `أنت رميت ${diceValue} - لا توجد حركة`
+        : `الكمبيوتر (${player.colorId}) رمى ${diceValue} - لا توجد حركة`;
 
+setTimeout(() => {
+    if (
+        gameSession === rollingSession &&
+        currentPlayer === rollingPlayerIndex
+    ) {
+        nextTurn();
+    }
+}, 1200);
+
+    return;
+}
         canMovePiece = true;
 
         document.getElementById("turn-info").textContent =
@@ -546,7 +686,7 @@ function animatePieceTo(piece, targetPosition, player) {
     }
     return new Promise(resolve => {
         const startPosition = piece.position;
-        const duration = 140;
+        const duration = 250;
         const startTime = performance.now();
 
         function animate(currentTime) {
@@ -628,18 +768,25 @@ const expectedSession = gameSession;
 }
 
     // القطعة وصلت للنهاية بالفعل
-    if (piece.position === 57) return;
+    const finishPosition =
+    getFinishPosition(pieceOwner.colorId);
+
+if (piece.position === finishPosition) return;
 
     // منع تخطي خانة النهاية
-if (piece.position + diceValue > 57) return;
+const targetPosition = piece.position + diceValue;
+
+if (targetPosition > finishPosition) return;
 
 
 
 isAnimating = true;
     canMovePiece = false;
 
-    // تحريك القطعة خانة بخانة
-    for (let step = 0; step < diceValue; step++) {
+   // تحريك القطعة خانة بخانة مع فحص الالتقاط
+let captured = false;
+
+for (let step = 0; step < diceValue; step++) {
     await animatePieceTo(
         piece,
         piece.position + 1,
@@ -647,15 +794,36 @@ isAnimating = true;
     );
 
     if (gameSession !== movingSession) return;
-}
-if (gameSession !== movingSession) return;
-    // فحص أكل القطع في الطريق الخارجي فقط
-    let captured = false;
 
-    if (piece.position <= 51) {
-        captured = await capturePieces(pieceOwner, piece);
-        if (gameSession !== movingSession) return;
-    }
+    // فحص الالتقاط عند كل خانة خارجية
+   const entryPosition =
+    getHomeEntryPosition(pieceOwner.colorId);
+
+if (piece.position <= entryPosition) {
+    const stepCaptured = await capturePieces(
+        pieceOwner,
+        piece
+    );
+
+    if (gameSession !== movingSession) return;
+
+    captured = captured || stepCaptured;
+}
+}
+
+    console.log(
+        "حركة القطعة:",
+        pieceOwner.colorId,
+        "الموضع:",
+        piece.position,
+        "السهم:",
+        getHomeEntryPosition(pieceOwner.colorId),
+        "بداية الممر:",
+        getHomeStartPosition(pieceOwner.colorId)
+    );
+
+if (gameSession !== movingSession) return;
+
 
     renderLudoBoard();
 
@@ -670,12 +838,14 @@ if (teamMode) {
     );
 
     playerWon = teammates.every(teammate =>
-        teammate.pieces.every(piece => piece.position === 57)
-    );
+    teammate.pieces.every(piece =>
+        piece.position === getFinishPosition(teammate.colorId)
+    )
+);
 } else {
     playerWon = player.pieces.every(
-        p => p.position === 57
-    );
+    p => p.position === getFinishPosition(player.colorId)
+);
 }
 
    if (playerWon) {
@@ -696,10 +866,11 @@ if (teamMode) {
 }
 
     // هل أنهى قطعة ولسه عنده قطع أخرى؟
-    const finishedPiece = piece.position === 57;
+   const finishedPiece =
+    piece.position === finishPosition;
 
-    const hasPiecesNotFinished = pieceOwner.pieces.some(
-    p => p.position !== 57
+const hasPiecesNotFinished = pieceOwner.pieces.some(
+    p => p.position !== finishPosition
 );
 
     // الدور الإضافي
@@ -736,8 +907,10 @@ if (teamMode) {
 async function capturePieces(player, movedPiece) {
     let captured = false;
     const captureSession = gameSession;
-    const currentPosition =
-        (startPositions[player.colorId] + movedPiece.position) % 52;
+    const currentPosition = getTrackIndex(
+    player.colorId,
+    movedPiece.position
+);
 
     const safePositions = [
     // خانات النجوم الأربعة
@@ -761,7 +934,7 @@ async function capturePieces(player, movedPiece) {
         return index === currentPosition;
     });
 
-    if (isSafe) return;
+    if (isSafe) return false;
 
     for (const opponent of players) {
     if (
@@ -770,12 +943,15 @@ async function capturePieces(player, movedPiece) {
     ) continue;
         // لو فيه قطعتين أو أكثر من نفس اللون في الخانة، يبقى حاجز
 const piecesOnPosition = opponent.pieces.filter(piece => {
-    if (piece.position < 0 || piece.position > 51) {
-        return false;
-    }
+   if (
+    piece.position < 0 ||
+    piece.position > getHomeEntryPosition(opponent.colorId)
+) return false;
 
-    const opponentPosition =
-        (startPositions[opponent.colorId] + piece.position) % 52;
+    const opponentPosition = getTrackIndex(
+    opponent.colorId,
+    piece.position
+);
 
     return opponentPosition === currentPosition;
 });
@@ -786,10 +962,14 @@ if (piecesOnPosition.length >= 2) {
 
         for (const piece of opponent.pieces) {
             // القطع الموجودة في البيت أو ممر النهاية لا تُؤكل
-if (piece.position < 0 || piece.position > 51) continue;
-
-            const opponentPosition =
-                (startPositions[opponent.colorId] + piece.position) % 52;
+if (
+    piece.position < 0 ||
+    piece.position > getHomeEntryPosition(opponent.colorId)
+) continue;
+            const opponentPosition = getTrackIndex(
+    opponent.colorId,
+    piece.position
+);
 
             if (opponentPosition !== currentPosition) continue;
 
@@ -817,12 +997,13 @@ captured = true;
 function renderLudoBoard() {
     const board = document.getElementById("ludo-board");
 
-    const size = 40;
+    const cellWidth = 48;
+const cellHeight = 40;
     let svg = `
-    <svg viewBox="0 0 600 600"
-         xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 720 600"
+     xmlns="http://www.w3.org/2000/svg">
 
-    <rect width="600" height="600" fill="white"/>
+<rect width="720" height="600" fill="white"/>
 
     `;
 
@@ -835,40 +1016,40 @@ function renderLudoBoard() {
 
     // البيوت الأربعة
     const homes = [
-        { color: "red", x: 0, y: 0 },
-        { color: "green", x: 360, y: 0 },
-        { color: "blue", x: 0, y: 360 },
-        { color: "yellow", x: 360, y: 360 }
-    ];
+    { color: "red", x: 0, y: 0 },
+    { color: "green", x: 432, y: 0 },
+    { color: "blue", x: 0, y: 360 },
+    { color: "yellow", x: 432, y: 360 }
+];
 
     homes.forEach(home => {
         svg += `
         <rect x="${home.x}" y="${home.y}"
-              width="240" height="240"
-              fill="${boardColors[home.color]}"/>
+      width="288" height="240"
+      fill="${boardColors[home.color]}"/>
 
-        <rect x="${home.x + 40}" y="${home.y + 40}"
-              width="160" height="160"
-              fill="white"
-              stroke="#292522"
-              stroke-width="3"/>
-                    <circle cx="${home.x + 80}" cy="${home.y + 80}"
+<rect x="${home.x + 48}" y="${home.y + 40}"
+      width="192" height="160"
+      fill="white"
+      stroke="#292522"
+      stroke-width="3"/>
+                    <circle cx="${home.x + 96}" cy="${home.y + 80}"
                 r="20" fill="${boardColors[home.color]}"
                 stroke="#292522" stroke-width="3"/>
 
-        <circle cx="${home.x + 160}" cy="${home.y + 80}"
+        <circle cx="${home.x + 192}" cy="${home.y + 80}"
                 r="20" fill="${boardColors[home.color]}"
                 stroke="#292522" stroke-width="3"/>
 
-        <circle cx="${home.x + 80}" cy="${home.y + 160}"
+        <circle cx="${home.x + 96}" cy="${home.y + 160}"
                 r="20" fill="${boardColors[home.color]}"
                 stroke="#292522" stroke-width="3"/>
 
-        <circle cx="${home.x + 160}" cy="${home.y + 160}"
+        <circle cx="${home.x + 192}" cy="${home.y + 160}"
                 r="20" fill="${boardColors[home.color]}"
-                stroke="#292522" stroke-width="3"/>  
+                stroke="#292522" stroke-width="3"/>
         `;
-        
+
 // تيجان الفائزين
 winnersRanking.forEach(winner => {
     winner.colors.forEach(colorId => {
@@ -914,23 +1095,22 @@ winnersRanking.forEach(winner => {
         `;
     });
 });
-        
+
     });
 
     // إنشاء خلايا مسار اللعب
     function drawCell(row, col, color = "white") {
-        const x = col * size;
-        const y = row * size;
+    const x = col * cellWidth;
+    const y = row * cellHeight;
 
-        svg += `
-        <rect x="${x}" y="${y}"
-              width="${size}" height="${size}"
-              fill="${color}"
-              stroke="#292522"
-              stroke-width="2.5"/>
-        `;
-    }
-
+    svg += `
+    <rect x="${x}" y="${y}"
+          width="${cellWidth}" height="${cellHeight}"
+          fill="${color}"
+          stroke="#292522"
+          stroke-width="2.5"/>
+    `;
+}
     // المسار العلوي والسفلي
     for (let row = 0; row < 6; row++) {
         for (let col = 6; col <= 8; col++) {
@@ -975,12 +1155,34 @@ winnersRanking.forEach(winner => {
         }
     }
 
-    // مربعات البداية
-    // مربعات البداية
+   // مربعات البداية والأسهم
 drawCell(6, 1, boardColors.red);
 drawCell(1, 8, boardColors.green);
 drawCell(8, 13, boardColors.yellow);
 drawCell(13, 6, boardColors.blue);
+
+const startArrows = [
+    { row: 7, col: 0, angle: 0, color: boardColors.red },
+    { row: 0, col: 7, angle: 90, color: boardColors.green },
+    { row: 7, col: 14, angle: 180, color: boardColors.yellow },
+    { row: 14, col: 7, angle: 270, color: boardColors.blue }
+];
+
+startArrows.forEach(item => {
+    const x = item.col * cellWidth + cellWidth / 2;
+    const y = item.row * cellHeight + cellHeight / 2;
+
+    svg += `
+        <polygon
+            points="-18,-8 4,-8 4,-15 19,0 4,15 4,8 -18,8"
+            transform="translate(${x},${y}) rotate(${item.angle})"
+            fill="${item.color}"
+            stroke="#292522"
+            stroke-width="1.5"
+            stroke-linejoin="round"
+        />
+    `;
+});
 
 // نجوم الأمان الأربعة
 // نجوم الأمان الأربعة على الطريق الخارجي
@@ -992,9 +1194,8 @@ const safeStars = [
 ];
 
 safeStars.forEach(([row, col]) => {
-    const x = col * size + size / 2;
-    const y = row * size + size / 2;
-
+    const x = col * cellWidth + cellWidth / 2;
+const y = row * cellHeight + cellHeight / 2;
     svg += `
         <text
             x="${x}"
@@ -1009,29 +1210,27 @@ safeStars.forEach(([row, col]) => {
 });
 
     // مركز اللوحة
-    svg += `
-        <polygon points="240,240 360,240 300,300"
-                 fill="${boardColors.green}"
-                 stroke="#292522" stroke-width="2"/>
+svg += `
+    <polygon points="288,240 432,240 360,300"
+             fill="${boardColors.green}"
+             stroke="#292522" stroke-width="2"/>
 
-        <polygon points="360,240 360,360 300,300"
-                 fill="${boardColors.yellow}"
-                 stroke="#292522" stroke-width="2"/>
+    <polygon points="432,240 432,360 360,300"
+             fill="${boardColors.yellow}"
+             stroke="#292522" stroke-width="2"/>
 
-        <polygon points="240,360 360,360 300,300"
-                 fill="${boardColors.blue}"
-                 stroke="#292522" stroke-width="2"/>
+    <polygon points="288,360 432,360 360,300"
+             fill="${boardColors.blue}"
+             stroke="#292522" stroke-width="2"/>
 
-        <polygon points="240,240 240,360 300,300"
-                 fill="${boardColors.red}"
-                 stroke="#292522" stroke-width="2"/>
+    <polygon points="288,240 288,360 360,300"
+             fill="${boardColors.red}"
+             stroke="#292522" stroke-width="2"/>
 
-        <rect x="0" y="0" width="600" height="600"
-              fill="none" stroke="#292522" stroke-width="3"/>
+    <rect x="0" y="0" width="720" height="600"
+          fill="none" stroke="#292522" stroke-width="3"/>
+`;
 
-    
-    `;
-      
 svg += drawPlayerPieces();
 svg += `</svg>`;
 
@@ -1063,7 +1262,7 @@ function returnHome() {
     document.getElementById("home-screen").hidden = false;
 
     players = [];
-    
+
     currentPlayer = 0;
     diceValue = 0;
     canRoll = true;

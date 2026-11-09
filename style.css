@@ -410,32 +410,37 @@ button:active {
     }
 
     .ludo-area {
+        position: absolute;
+        top: 55px;
+        right: 100px;
+        bottom: 5px;
+        left: 100px;
+        width: auto;
+        min-height: 0;
+        display: grid;
+        place-items: center;
+    }
+
+    .ludo-board {
+        width: min(
+            calc(100vw - 220px),
+            calc((100dvh - 65px) * 1.2)
+        );
+        max-width: none;
+        height: auto;
+        aspect-ratio: 6 / 5;
+    }
+
+    .back-home-btn {
     position: absolute;
-    top: 5px;
-    right: 0;
-    bottom: 5px;
-    left: 0;
-    width: 100%;
-    min-height: 0;
-    display: grid;
-    place-items: center;
+    left: 12px;
+    top: 8px;
+    width: 85px;
+    padding: 10px 5px;
+    font-size: 14px;
+    z-index: 20;
 }
 
-.ludo-board {
-    width: min(calc(100dvh - 10px), calc(100vw - 10px));
-    max-width: none;
-    height: auto;
-    aspect-ratio: 1;
-}
-    .back-home-btn {
-        position: absolute;
-        left: 12px;
-        top: 8px;
-        width: 85px;
-        padding: 10px 5px;
-        font-size: 14px;
-        z-index: 20;
-    }
 
     .player-dice {
         width: 65px;
@@ -446,24 +451,23 @@ button:active {
         width: 58px;
         height: 58px;
     }
-
     .red-dice {
-        left: 1%;
-        top: 1%;
-    }
+    left: 1%;
+    top: 1%;
+}
 
-    .green-dice {
-        right: 1%;
-        top: 1%;
-    }
+.green-dice {
+    right: 1%;
+    top: 1%;
+}
 
-    .blue-dice {
-        left: 1%;
-        bottom: 1%;
-    }
+.blue-dice {
+    left: 1%;
+    bottom: 1%;
+}
 
-    .yellow-dice {
-        right: 1%;
-        bottom: 1%;
-    }
+.yellow-dice {
+    right: 1%;
+    bottom: 1%;
+}
 }
